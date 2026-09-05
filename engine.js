@@ -1,41 +1,21 @@
-/* RAF Coaching — NASM/OPT knowledge-based coaching engine v2 */
+/* RAF Coaching — NASM/OPT knowledge-based coaching engine v3 */
 const RAF_EXERCISES=[
- {id:'squat',name:'Back Squat',pattern:'squat',level:'intermediate',muscles:['quads','glutes'],equipment:'barbell',regression:'Bodyweight Squat',progression:'Front Squat',instruction:'Brace, keep a controlled descent, and maintain knee-foot alignment.'},
- {id:'bench',name:'Bench Press',pattern:'push',level:'intermediate',muscles:['chest','triceps'],equipment:'barbell',regression:'Incline Push-up',progression:'Dumbbell Bench Press',instruction:'Maintain stable shoulders and controlled range of motion.'},
- {id:'incline-db',name:'Incline Dumbbell Press',pattern:'push',level:'beginner',muscles:['upper chest','shoulders'],equipment:'dumbbells',regression:'Machine Chest Press',progression:'Incline Barbell Press',instruction:'Lower with control and avoid excessive shoulder elevation.'},
- {id:'lat-pulldown',name:'Lat Pulldown',pattern:'pull',level:'beginner',muscles:['lats','biceps'],equipment:'cable',regression:'Assisted Pulldown',progression:'Pull-up',instruction:'Pull elbows toward the ribs without swinging.'},
- {id:'row',name:'Seated Row',pattern:'pull',level:'beginner',muscles:['back','biceps'],equipment:'cable',regression:'Chest-supported Row',progression:'Single-arm Row',instruction:'Keep the trunk stable and finish with shoulder blades moving naturally.'},
- {id:'rdl',name:'Romanian Deadlift',pattern:'hinge',level:'intermediate',muscles:['hamstrings','glutes'],equipment:'dumbbells',regression:'Dowel Hip Hinge',progression:'Barbell Romanian Deadlift',instruction:'Hinge at the hips while keeping a neutral spine.'},
- {id:'leg-press',name:'Leg Press',pattern:'squat',level:'beginner',muscles:['quads','glutes'],equipment:'machine',regression:'Box Squat',progression:'Single-leg Press',instruction:'Use a pain-free range and keep the pelvis controlled.'},
- {id:'leg-curl',name:'Leg Curl',pattern:'hinge',level:'beginner',muscles:['hamstrings'],equipment:'machine',regression:'Stability-ball Curl',progression:'Single-leg Curl',instruction:'Move through the available range without jerking.'},
- {id:'lateral-raise',name:'Lateral Raise',pattern:'carry',level:'beginner',muscles:['side delts'],equipment:'dumbbells',regression:'Cable Lateral Raise',progression:'Lean-away Lateral Raise',instruction:'Raise with control and avoid shrugging.'},
- {id:'curl',name:'Dumbbell Curl',pattern:'pull',level:'beginner',muscles:['biceps'],equipment:'dumbbells',regression:'Cable Curl',progression:'Incline Dumbbell Curl',instruction:'Keep the upper arm stable and control the lowering phase.'}
+{id:'squat',name:'Back Squat',pattern:'squat',level:'intermediate',muscles:['quads','glutes'],equipment:'barbell',regression:'Bodyweight Squat',progression:'Front Squat',instruction:'Brace, control the descent, and keep knee-foot alignment.',mistakes:'Knees collapse inward; loss of trunk control.'},
+{id:'bench',name:'Bench Press',pattern:'push',level:'intermediate',muscles:['chest','triceps'],equipment:'barbell',regression:'Incline Push-up',progression:'Dumbbell Bench Press',instruction:'Keep shoulders stable and use controlled range.',mistakes:'Excessive shoulder flare; bouncing the bar.'},
+{id:'incline-db',name:'Incline Dumbbell Press',pattern:'push',level:'beginner',muscles:['upper chest','shoulders'],equipment:'dumbbells',regression:'Machine Chest Press',progression:'Incline Barbell Press',instruction:'Lower with control and avoid shoulder elevation.',mistakes:'Overarching; uncontrolled lowering.'},
+{id:'lat-pulldown',name:'Lat Pulldown',pattern:'pull',level:'beginner',muscles:['lats','biceps'],equipment:'cable',regression:'Assisted Pulldown',progression:'Pull-up',instruction:'Pull elbows toward ribs without swinging.',mistakes:'Leaning back excessively; using momentum.'},
+{id:'row',name:'Seated Row',pattern:'pull',level:'beginner',muscles:['back','biceps'],equipment:'cable',regression:'Chest-supported Row',progression:'Single-arm Row',instruction:'Keep trunk stable and move shoulder blades naturally.',mistakes:'Rounding the back; jerking.'},
+{id:'rdl',name:'Romanian Deadlift',pattern:'hinge',level:'intermediate',muscles:['hamstrings','glutes'],equipment:'dumbbells',regression:'Dowel Hip Hinge',progression:'Barbell Romanian Deadlift',instruction:'Hinge at hips with a neutral spine.',mistakes:'Squatting instead of hinging; spinal flexion.'},
+{id:'leg-press',name:'Leg Press',pattern:'squat',level:'beginner',muscles:['quads','glutes'],equipment:'machine',regression:'Box Squat',progression:'Single-leg Press',instruction:'Use a pain-free range and control the pelvis.',mistakes:'Pelvis rolling; knees collapsing.'},
+{id:'leg-curl',name:'Leg Curl',pattern:'hinge',level:'beginner',muscles:['hamstrings'],equipment:'machine',regression:'Stability-ball Curl',progression:'Single-leg Curl',instruction:'Move through available range without jerking.',mistakes:'Hip lifting; fast eccentric.'},
+{id:'lateral-raise',name:'Lateral Raise',pattern:'carry',level:'beginner',muscles:['side delts'],equipment:'dumbbells',regression:'Cable Lateral Raise',progression:'Lean-away Lateral Raise',instruction:'Raise with control and avoid shrugging.',mistakes:'Swinging; shrugging.'},
+{id:'curl',name:'Dumbbell Curl',pattern:'pull',level:'beginner',muscles:['biceps'],equipment:'dumbbells',regression:'Cable Curl',progression:'Incline Dumbbell Curl',instruction:'Keep upper arm stable and control lowering.',mistakes:'Body swing; elbow drifting.'}
 ];
-const RAF_OPT_RULES={
- 1:{name:'Stabilization Endurance',goal:'Improve stabilization, muscular endurance, and movement control.',sets:'1–3',reps:'12–20',tempo:'4/2/1',rest:'0–90 sec',rir:3},
- 2:{name:'Strength Endurance',goal:'Build strength endurance using controlled resistance and stabilization.',sets:'2–4',reps:'8–12',tempo:'2/0/2',rest:'0–60 sec',rir:2},
- 3:{name:'Hypertrophy',goal:'Increase muscle size through sufficient training volume.',sets:'3–5',reps:'6–12',tempo:'2/0/2',rest:'0–60 sec',rir:1},
- 4:{name:'Maximal Strength',goal:'Improve maximal force production with heavier resistance.',sets:'4–6',reps:'1–5',tempo:'X/0/X',rest:'2–5 min',rir:2},
- 5:{name:'Power',goal:'Develop force production at higher velocity with safe technical execution.',sets:'3–5',reps:'1–5',tempo:'X/0/X',rest:'2–5 min',rir:2}
-};
-function hasLimitation(profile={}){return Boolean(profile.limitations&&profile.limitations!=='none')}
-function selectOPTPhase(profile={}){
- if(profile.technique==='needs-regression'||hasLimitation(profile)||profile.experience==='beginner')return 1;
- if(profile.goal==='muscle')return 3;
- if(profile.goal==='strength')return 4;
- if(profile.goal==='power'&&profile.experience==='advanced')return 5;
- return 2;
-}
+const RAF_OPT_RULES={1:{name:'Stabilization Endurance',goal:'Improve stabilization, muscular endurance, and movement control.',sets:'1–3',reps:'12–20',tempo:'4/2/1',rest:'0–90 sec',rir:3},2:{name:'Strength Endurance',goal:'Build strength endurance using controlled resistance and stabilization.',sets:'2–4',reps:'8–12',tempo:'2/0/2',rest:'0–60 sec',rir:2},3:{name:'Hypertrophy',goal:'Increase muscle size through sufficient training volume.',sets:'3–5',reps:'6–12',tempo:'2/0/2',rest:'0–60 sec',rir:1},4:{name:'Maximal Strength',goal:'Improve maximal force production with heavier resistance.',sets:'4–6',reps:'1–5',tempo:'X/0/X',rest:'2–5 min',rir:2},5:{name:'Power',goal:'Develop force production at higher velocity with safe technical execution.',sets:'3–5',reps:'1–5',tempo:'X/0/X',rest:'2–5 min',rir:2}};
+function hasLimitation(p={}){return Boolean(p.limitations&&p.limitations!=='none')}
+function selectOPTPhase(p={}){if(p.technique==='needs-regression'||hasLimitation(p)||p.experience==='beginner')return 1;if(p.goal==='muscle')return 3;if(p.goal==='strength')return 4;if(p.goal==='power'&&p.experience==='advanced')return 5;return 2}
 function acuteVariables(phase){return RAF_OPT_RULES[phase]||RAF_OPT_RULES[1]}
-function chooseExercises(profile={},phase=1){
- let pool=[...RAF_EXERCISES];
- if(hasLimitation(profile))pool=pool.filter(e=>!['rdl','squat'].includes(e.id));
- if(profile.equipment==='home')pool=pool.filter(e=>!['bench','lat-pulldown','row','leg-press','leg-curl'].includes(e.id));
- if(phase===1)pool=pool.filter(e=>e.level==='beginner'||e.id==='incline-db');
- return pool.slice(0,6);
-}
-function buildProgram(profile={}){
- const phase=selectOPTPhase(profile),variables=acuteVariables(phase),exercises=chooseExercises(profile,phase);
- return {phase,phaseName:variables.name,goal:variables.goal,variables,exercises,decision:{reason:phase===1?'Movement quality, limitations, or beginner status requires a stabilization/regression emphasis.':`The selected goal and training status support ${variables.name}.`,coachOverrideAllowed:true,medicalDiagnosis:false},progression:{rule:'Progress only when posture, technique, range of motion, and control are acceptable.',nextStep:'Increase complexity, load, volume, or speed gradually after successful execution.'}};
-}
-window.RAF={RAF_EXERCISES,RAF_OPT_RULES,selectOPTPhase,acuteVariables,chooseExercises,buildProgram};
+function chooseExercises(p={},phase=1){let pool=[...RAF_EXERCISES];if(hasLimitation(p))pool=pool.filter(e=>!['rdl','squat'].includes(e.id));if(p.equipment==='home')pool=pool.filter(e=>!['bench','lat-pulldown','row','leg-press','leg-curl'].includes(e.id));if(phase===1)pool=pool.filter(e=>e.level==='beginner'||e.id==='incline-db');return pool.slice(0,6)}
+function compatibleReplacements(exercise,p={}){return RAF_EXERCISES.filter(e=>e.pattern===exercise.pattern&&e.id!==exercise.id&&!(hasLimitation(p)&&['rdl','squat'].includes(e.id))&&!(p.equipment==='home'&&['bench','lat-pulldown','row','leg-press','leg-curl'].includes(e.id)))}
+function buildProgram(p={}){const phase=selectOPTPhase(p),variables=acuteVariables(phase),exercises=chooseExercises(p,phase);return{phase,phaseName:variables.name,goal:variables.goal,variables,exercises,decision:{reason:phase===1?'Movement quality, limitations, or beginner status requires stabilization/regression emphasis.':`The selected goal and training status support ${variables.name}.`,coachOverrideAllowed:true,medicalDiagnosis:false},progression:{rule:'Progress only when posture, technique, range of motion, and control are acceptable.',nextStep:'Increase complexity, load, volume, or speed gradually after successful execution.'}}}
+window.RAF={RAF_EXERCISES,RAF_OPT_RULES,selectOPTPhase,acuteVariables,chooseExercises,compatibleReplacements,buildProgram};

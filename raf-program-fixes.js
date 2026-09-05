@@ -1,34 +1,40 @@
-/* RAF Coaching — program flexibility and screening options */
+/* RAF Coaching — comprehensive assessment findings + exercise library */
 (function(){
-  const extraExercises=[
-    {id:'glute-bridge',name:'Glute Bridge',pattern:'hinge',level:'beginner',muscles:['glutes'],equipment:'bodyweight',instruction:'Brace and squeeze glutes without arching.'},
-    {id:'split-squat',name:'Supported Split Squat',pattern:'squat',level:'beginner',muscles:['quads','glutes'],equipment:'bodyweight',instruction:'Use support and stay in a pain-free range.'},
-    {id:'wall-pushup',name:'Wall Push-up',pattern:'push',level:'beginner',muscles:['chest','triceps'],equipment:'bodyweight',instruction:'Keep ribs down and move with control.'},
-    {id:'dead-bug',name:'Dead Bug',pattern:'core',level:'beginner',muscles:['core'],equipment:'bodyweight',instruction:'Maintain neutral spine while moving opposite limbs.'},
-    {id:'bird-dog',name:'Bird Dog',pattern:'core',level:'beginner',muscles:['core','back'],equipment:'bodyweight',instruction:'Reach long without rotating the pelvis.'},
-    {id:'band-row',name:'Resistance Band Row',pattern:'pull',level:'beginner',muscles:['back','biceps'],equipment:'band',instruction:'Pull elbows back while keeping the trunk stable.'},
-    {id:'calf-raise',name:'Calf Raise',pattern:'carry',level:'beginner',muscles:['calves'],equipment:'bodyweight',instruction:'Rise slowly and control the lowering phase.'},
-    {id:'mobility-ankle',name:'Knee-to-Wall Ankle Mobility',pattern:'mobility',level:'beginner',muscles:['ankle'],equipment:'bodyweight',instruction:'Move the knee forward without lifting the heel.'},
-    {id:'thoracic-rotation',name:'Quadruped Thoracic Rotation',pattern:'mobility',level:'beginner',muscles:['thoracic spine'],equipment:'bodyweight',instruction:'Rotate gently through the upper back.'}
+  const extras=[
+    {id:'glute-bridge',name:'Glute Bridge',pattern:'corrective',level:'beginner',muscles:['glutes'],equipment:'bodyweight',instruction:'Brace, keep ribs down, and squeeze the glutes without arching.'},
+    {id:'dead-bug',name:'Dead Bug',pattern:'corrective',level:'beginner',muscles:['core'],equipment:'bodyweight',instruction:'Maintain a neutral spine while moving opposite limbs slowly.'},
+    {id:'bird-dog',name:'Bird Dog',pattern:'corrective',level:'beginner',muscles:['core','back'],equipment:'bodyweight',instruction:'Reach long without rotating the pelvis or lumbar spine.'},
+    {id:'wall-slide',name:'Wall Slide',pattern:'corrective',level:'beginner',muscles:['shoulders','upper back'],equipment:'bodyweight',instruction:'Keep the ribs down and slide the arms without pain.'},
+    {id:'thoracic-rotation',name:'Quadruped Thoracic Rotation',pattern:'mobility',level:'beginner',muscles:['thoracic spine'],equipment:'bodyweight',instruction:'Rotate gently through the upper back, not the lower back.'},
+    {id:'mobility-ankle',name:'Knee-to-Wall Ankle Mobility',pattern:'mobility',level:'beginner',muscles:['ankle'],equipment:'bodyweight',instruction:'Drive the knee forward while keeping the heel down.'},
+    {id:'hip-flexor-stretch',name:'Half-kneeling Hip Flexor Stretch',pattern:'flexibility',level:'beginner',muscles:['hip flexors'],equipment:'bodyweight',instruction:'Tuck the pelvis slightly and stretch without lumbar extension.'},
+    {id:'cat-cow',name:'Cat-Cow Mobility',pattern:'mobility',level:'beginner',muscles:['spine'],equipment:'bodyweight',instruction:'Move slowly through a comfortable spinal range.'}
   ];
+  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   function enhance(){
     if(!window.RAF||!document.body)return;
-    extraExercises.forEach(x=>{if(!RAF.RAF_EXERCISES.some(e=>e.id===x.id))RAF.RAF_EXERCISES.push(x)});
+    extras.forEach(x=>{if(!RAF.RAF_EXERCISES.some(e=>e.id===x.id))RAF.RAF_EXERCISES.push(x)});
     const form=document.querySelector('#assessment-form');
-    if(form&&!form.dataset.fixEnhanced){
-      form.dataset.fixEnhanced='1';
+    if(form&&!form.dataset.comprehensive){
+      form.dataset.comprehensive='1';
       const anchor=form.querySelector('button[type=submit]');
-      [['injuryType','Injury / pain area','none|Knee|Back|Shoulder|Hip|Ankle|Other'],['mobilityNeed','Mobility focus','none|Ankle mobility|Hip mobility|Shoulder mobility|Thoracic mobility|Multiple areas'],['exercisePreference','Exercise preference','all|Bodyweight|Bands|Machines|Dumbbells']].forEach(([n,l,vals])=>{const w=document.createElement('label');w.innerHTML=l+'<select name="'+n+'">'+vals.split('|').map(v=>'<option value="'+v+'">'+v+'</option>').join('')+'</select>';form.insertBefore(w,anchor)});
+      const groups=[
+       ['🧍 Posture / deviation','posture','none|Forward head|Rounded shoulders|Anterior pelvic tilt|Knees inward|Feet turn out|Spinal deviation — refer out'],
+       ['🩹 Pain / injury area','injuryType','none|Low back pain|Knee pain|Shoulder pain|Hip pain|Ankle pain|Other'],
+       ['🦴 Mobility focus','mobilityNeed','none|Ankle mobility|Hip mobility|Shoulder mobility|Thoracic mobility|Multiple areas'],
+       ['🤸 Flexibility focus','flexibilityNeed','none|Calves|Hip flexors|Hamstrings|Chest / shoulders|Multiple areas'],
+       ['🎯 Movement quality','movementQuality','not-tested|Good control|Needs regression|Pain or compensation']
+      ];
+      groups.forEach(([label,name,vals])=>{const w=document.createElement('label');w.innerHTML='<strong>'+label+'</strong><select name="'+name+'">'+vals.split('|').map(v=>'<option>'+esc(v)+'</option>').join('')+'</select>';form.insertBefore(w,anchor)});
     }
-    const pf=document.querySelector('#program-form');
-    if(pf&&!pf.dataset.flexEnhanced){
-      pf.dataset.flexEnhanced='1';
-      const box=pf.querySelector('.card:nth-of-type(2)'); if(!box)return;
-      const add=document.createElement('div');add.className='card';add.innerHTML='<strong>Add exercises</strong><p class="muted">You are not limited to six exercises. Add as many as the session needs.</p><div id="extra-exercises"></div><button type="button" class="secondary" id="add-exercise">+ Add another exercise</button>';
-      pf.insertBefore(add,pf.querySelector('button[type=submit]'));
-      const list=add.querySelector('#extra-exercises');
-      add.querySelector('#add-exercise').onclick=()=>{const s=document.createElement('select');s.name='extra_exercise';s.innerHTML=RAF.RAF_EXERCISES.map(e=>'<option value="'+e.id+'">'+e.name+'</option>').join('');list.appendChild(s)};
-      pf.addEventListener('submit',()=>setTimeout(()=>{const saved=JSON.parse(localStorage.getItem('rafPrograms')||'{}');const profile=JSON.parse(localStorage.getItem('rafProfile')||'null');if(!profile)return;const p=saved[profile.name];if(!p)return;const ids=[...list.querySelectorAll('select')].map(s=>s.value);p.exercises=[...p.exercises,...ids.map(id=>RAF.RAF_EXERCISES.find(e=>e.id===id)).filter(Boolean)];saved[profile.name]=p;localStorage.setItem('rafPrograms',JSON.stringify(saved))},50));
+    const program=document.querySelector('#program-form');
+    if(program&&!document.querySelector('#assessment-findings')){
+      const profile=JSON.parse(localStorage.getItem('rafProfile')||'null')||{};
+      const keys=[['posture','🧍'],['injuryType','🩹'],['mobilityNeed','🦴'],['flexibilityNeed','🤸'],['movementQuality','🎯'],['painArea','⚠️']];
+      const findings=keys.map(([k,icon])=>profile[k]&&profile[k]!=='none'&&profile[k]!=='not-tested'?'<span class="tag">'+icon+' '+esc(profile[k])+'</span>':'').filter(Boolean).join('');
+      const related=extras.filter(e=>{const p=JSON.stringify(profile).toLowerCase();return (p.includes('back')&&['corrective','mobility'].includes(e.pattern))||(p.includes('shoulder')&&e.id==='wall-slide')||(p.includes('hip')&&['glute-bridge','hip-flexor-stretch'].includes(e.id))||(p.includes('ankle')&&e.id==='mobility-ankle')||(p.includes('thoracic')&&e.id==='thoracic-rotation')||(p.includes('pelvic')&&['dead-bug','bird-dog'].includes(e.id))||p.includes('multiple')||p.includes('deviation')});
+      const card=document.createElement('div');card.id='assessment-findings';card.className='card';card.innerHTML='<h3>Assessment findings</h3><p class="muted">Selected findings guide exercise choices. This is not a diagnosis; pain or suspected deviation requires clinical referral.</p><div class="tags">'+(findings||'<span class="muted">No specific findings selected.</span>')+'</div>'+(related.length?'<h3>Recommended corrective / mobility / flexibility library</h3><div>'+related.map(e=>'<div class="workout"><div><strong>'+esc(e.name)+'</strong><div class="muted">'+esc(e.pattern)+' · '+esc(e.muscles.join(' · '))+' · '+esc(e.equipment)+'</div><small>'+esc(e.instruction)+'</small></div><span class="tag">Recommended</span></div>').join('')+'</div>':'');
+      program.insertBefore(card,program.firstElementChild);
     }
   }
   new MutationObserver(enhance).observe(document.body,{childList:true,subtree:true});enhance();

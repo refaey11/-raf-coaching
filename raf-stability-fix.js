@@ -1,45 +1,13 @@
-/* RAF Coaching — reliable final interaction layer */
+/* RAF Coaching — stable persistence and working controls */
 (function(){
   'use strict';
-  function read(k,f){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?f:v}catch(e){return f}}
-  function write(k,v){localStorage.setItem(k,JSON.stringify(v))}
-  function refresh(){if(typeof window.render==='function')window.render('program')}
-  function saveAssessment(form){
-    const data=Object.fromEntries(new FormData(form));
-    data.age=Number(data.age); data.days=Number(data.days);
-    const clients=read('rafClients',[]), programs=read('rafPrograms',{});
-    write('rafProfile',data);
-    write('rafClients',[...clients.filter(c=>c.name!==data.name),data]);
-    if(window.RAF&&typeof RAF.buildProgram==='function')programs[data.name]=programs[data.name]||RAF.buildProgram(data);
-    write('rafPrograms',programs); location.hash='program'; refresh();
-  }
-  function saveProgram(form){
-    const profile=read('rafProfile',{}), all=read('rafPrograms',{});
-    if(!profile.name||!window.RAF||typeof RAF.buildProgram!=='function')return;
-    const base=all[profile.name]||RAF.buildProgram(profile), data=Object.fromEntries(new FormData(form));
-    base.variables={...(base.variables||{}),sets:Number(data.sets),reps:data.reps,tempo:data.tempo,rest:data.rest,rir:Number(data.rir)};
-    if(Array.isArray(base.exercises))base.exercises=base.exercises.map((old,i)=>RAF.RAF_EXERCISES.find(x=>x.id===data['exercise_'+i])||old);
-    all[profile.name]=base; write('rafPrograms',all);
-    const status=document.querySelector('#program-status'); if(status)status.textContent='Saved locally · Coach approval pending';
-  }
-  function addExercise(button){
-    const card=button.closest('article,.workout,.card');
-    const name=card&&card.querySelector('strong')&&card.querySelector('strong').textContent.trim();
-    const ex=window.RAF&&Array.isArray(RAF.RAF_EXERCISES)&&RAF.RAF_EXERCISES.find(x=>x.name===name);
-    if(!ex)return;
-    const p=read('rafProfile',{}), all=read('rafPrograms',{}), n=p.name||'Current Client';
-    const prog=all[n]||(RAF.buildProgram?RAF.buildProgram(p):{exercises:[]}); prog.exercises=Array.isArray(prog.exercises)?prog.exercises:[];
-    if(!prog.exercises.some(x=>x.id===ex.id))prog.exercises.push(ex);
-    all[n]=prog; write('rafPrograms',all); button.textContent='Added ✓'; button.disabled=true;
-  }
-  document.addEventListener('submit',function(e){
-    const form=e.target;
-    if(!form)return;
-    if(form.id==='assessment-form'){e.preventDefault();e.stopImmediatePropagation();saveAssessment(form)}
-    else if(form.id==='program-form'){e.preventDefault();e.stopImmediatePropagation();saveProgram(form)}
-  },true);
-  document.addEventListener('click',function(e){
-    const b=e.target.closest('button'); if(!b)return;
-    if(b.textContent.trim()==='Add to program'){e.preventDefault();e.stopImmediatePropagation();addExercise(b)}
-  },true);
+  const read=(k,f)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}};
+  const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  function getProgram(){const p=read('rafProfile',null);if(!p||!p.name)return null;const all=read('rafPrograms',{});if(!all[p.name]&&window.RAF&&RAF.buildProgram){all[p.name]=RAF.buildProgram(p);write('rafPrograms',all)}return {p,all,program:all[p.name]};}
+  function redraw(){if(typeof window.render==='function')window.render(location.hash.replace('#','')||'dashboard');}
+  function saveAssessment(form){const data=Object.fromEntries(new FormData(form));data.age=Number(data.age);data.days=Number(data.days);const clients=read('rafClients',[]),all=read('rafPrograms',{});write('rafProfile',data);write('rafClients',[...clients.filter(c=>c.name!==data.name),data]);if(window.RAF&&RAF.buildProgram)all[data.name]=all[data.name]||RAF.buildProgram(data);write('rafPrograms',all);location.hash='program';redraw();}
+  function saveProgram(form){const d=getProgram();if(!d)return;const data=Object.fromEntries(new FormData(form)),cur=d.program;cur.variables={...(cur.variables||{}),sets:Number(data.sets)||1,reps:data.reps||'',tempo:data.tempo||'',rest:data.rest||'',rir:Number(data.rir)||0};cur.exercises=(cur.exercises||[]).map((old,i)=>{const id=data['exercise_'+i];return (window.RAF&&RAF.RAF_EXERCISES||[]).find(x=>x.id===id)||old});d.all[d.p.name]=cur;write('rafPrograms',d.all);const s=document.querySelector('#program-status');if(s)s.textContent='Saved locally ✓';}
+  function addExercise(b){const card=b.closest('article,.workout,.card'),name=card?.querySelector('strong')?.textContent.trim(),ex=(window.RAF&&RAF.RAF_EXERCISES||[]).find(x=>x.name===name),d=getProgram();if(!ex||!d)return;d.program.exercises=Array.isArray(d.program.exercises)?d.program.exercises:[];if(!d.program.exercises.some(x=>x.id===ex.id))d.program.exercises.push(ex);d.all[d.p.name]=d.program;write('rafPrograms',d.all);b.textContent='Added ✓';b.disabled=true;}
+  document.addEventListener('submit',e=>{const f=e.target;if(!f)return;if(f.id==='assessment-form'){e.preventDefault();e.stopImmediatePropagation();saveAssessment(f)}else if(f.id==='program-form'){e.preventDefault();e.stopImmediatePropagation();saveProgram(f)}},true);
+  document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.textContent.trim()==='Add to program'){e.preventDefault();e.stopImmediatePropagation();addExercise(b)}},true);
 })();

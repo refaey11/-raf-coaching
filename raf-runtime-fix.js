@@ -1,22 +1,24 @@
-/* RAF Coaching runtime stability and navigation fix */
+/* RAF Coaching — preflight, navigation and runtime stability fix */
 (function () {
   'use strict';
-  var busy = false;
-  function currentView() {
-    return (window.location.hash || '#dashboard').slice(1) || 'dashboard';
+  function read(key, fallback) { try { var raw=localStorage.getItem(key); return raw?JSON.parse(raw):fallback; } catch(e){ return fallback; } }
+  function write(key,value) { try { localStorage.setItem(key,JSON.stringify(value)); } catch(e){} }
+  var profile=read('rafProfile',null), programs=read('rafPrograms',{});
+  if(profile&&profile.name&&programs&&programs[profile.name]){
+    var p=programs[profile.name];
+    if(!p||!p.variables||!Array.isArray(p.exercises)){ delete programs[profile.name]; write('rafPrograms',programs); localStorage.removeItem('rafCurrentProgram'); }
   }
-  function safeRender() {
-    if (busy || typeof window.render !== 'function') return;
-    busy = true;
-    try { window.render(currentView()); } catch (error) {
-      console.error('RAF render error:', error);
-      var content = document.querySelector('#app-content');
-      if (content) content.innerHTML = '<div class="card"><h2>حدث خطأ في تحميل الصفحة</h2><p class="muted">اعمل Refresh مرة واحدة، ولو استمرت المشكلة افتح الصفحة من جديد.</p><button class="primary" type="button" onclick="location.hash=\'#dashboard\';location.reload()">الرجوع للوحة التحكم</button></div>';
-    }
-    window.setTimeout(function () { busy = false; }, 0);
+  var supported=['dashboard','clients','assessment','program','rules'];
+  var hash=(location.hash||'#dashboard').slice(1);
+  if(hash&&supported.indexOf(hash)===-1) location.hash='#dashboard';
+  var busy=false;
+  function safeRender(){
+    if(busy||typeof window.render!=='function') return;
+    busy=true;
+    try { var view=(location.hash||'#dashboard').slice(1)||'dashboard'; if(supported.indexOf(view)===-1)view='dashboard'; window.render(view); }
+    catch(error){ console.error('RAF render error:',error); var c=document.querySelector('#app-content'); if(c)c.innerHTML='<div class="card"><h2>تعذر تحميل الصفحة</h2><p class="muted">ارجع للعملاء وافتح الملف مرة أخرى.</p><button class="primary" type="button" onclick="location.hash=\'#clients\';location.reload()">الرجوع للعملاء</button></div>'; }
+    setTimeout(function(){busy=false;},0);
   }
-  window.addEventListener('hashchange', safeRender);
-  window.addEventListener('pageshow', function () { window.setTimeout(safeRender, 0); });
-  window.addEventListener('error', function (event) { console.error('RAF runtime error:', event.error || event.message); });
-  window.addEventListener('unhandledrejection', function (event) { console.error('RAF promise error:', event.reason); });
+  window.addEventListener('hashchange',safeRender);
+  window.addEventListener('pageshow',function(){setTimeout(safeRender,0);});
 })();

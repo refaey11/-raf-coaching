@@ -1,4 +1,4 @@
-/* RAF Coaching — client-linked progress dashboard v3 */
+/* RAF Coaching — client-linked progress dashboard v4 */
 (function(){
  const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
  const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -22,5 +22,4 @@
  document.addEventListener('click',e=>{if(e.target.closest('[data-view="progress"]'))setTimeout(render,30)},true);
  window.addEventListener('hashchange',render);
  document.addEventListener('DOMContentLoaded',()=>setTimeout(render,100));
- setInterval(render,1000);
 })();

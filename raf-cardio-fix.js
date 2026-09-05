@@ -1,18 +1,11 @@
-/* RAF Coaching — replace Stair Climber with StairMaster */
+/* RAF Coaching — reliable exercise add/replace actions */
 (function(){
   const stair={id:'stairmaster',name:'StairMaster',category:'Cardio',finding:'Cardiovascular conditioning / lower-body endurance',level:'Intermediate',equipment:'StairMaster machine',sets:'1',duration:'10–20 min',tempo:'Steady',rest:'—',instruction:'Use a controlled pace and avoid leaning heavily on the handles.'};
-  function clean(){
-    if(!window.RAF)return;
-    RAF.RAF_EXERCISES=Array.isArray(RAF.RAF_EXERCISES)?RAF.RAF_EXERCISES:[];
-    RAF.RAF_EXERCISES=RAF.RAF_EXERCISES.filter(e=>e.id!=='stair-climber'&&e.name!=='Stair Climber');
-    if(!RAF.RAF_EXERCISES.some(e=>e.id==='stairmaster'))RAF.RAF_EXERCISES.push(stair);
-    document.querySelectorAll('article,button,div,section').forEach(el=>{
-      if(el.children.length>0 && el.textContent.trim()==='Stair Climber') el.remove();
-    });
-    document.querySelectorAll('article').forEach(card=>{
-      if(card.textContent.includes('Stair Climber')) card.remove();
-    });
-  }
-  clean();
-  new MutationObserver(clean).observe(document.body,{childList:true,subtree:true});
+  const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'')}catch(e){return fallback}};
+  function getData(){const profile=read('rafProfile',{}),all=read('rafPrograms',{}),name=profile.name||'Current Client',program=all[name]||{exercises:[]};program.exercises=Array.isArray(program.exercises)?program.exercises:[];return {all,name,program};}
+  function save(d){d.all[d.name]=d.program;localStorage.setItem('rafPrograms',JSON.stringify(d.all));document.dispatchEvent(new CustomEvent('raf:program-updated'));}
+  function put(ex,replace){const d=getData();if(replace||ex.category==='Cardio')d.program.exercises=d.program.exercises.filter(x=>x.category!=='Cardio');if(!d.program.exercises.some(x=>x.id===ex.id))d.program.exercises.push(ex);save(d);}
+  function clean(){if(!window.RAF)return;RAF.RAF_EXERCISES=Array.isArray(RAF.RAF_EXERCISES)?RAF.RAF_EXERCISES:[];RAF.RAF_EXERCISES=RAF.RAF_EXERCISES.filter(e=>e.id!=='stair-climber'&&e.name!=='Stair Climber');if(!RAF.RAF_EXERCISES.some(e=>e.id==='stairmaster'))RAF.RAF_EXERCISES.push(stair);document.querySelectorAll('article').forEach(c=>{if(c.textContent.includes('Stair Climber'))c.remove()});}
+  document.addEventListener('click',function(ev){const btn=ev.target.closest('button');if(!btn)return;const card=btn.closest('article,.workout');const title=card&&card.querySelector('strong');if(!title)return;const name=title.textContent.trim();if(name==='StairMaster'&&(btn.textContent.includes('Replace')||btn.textContent.includes('Add'))){ev.preventDefault();put(stair,true);btn.textContent='Replaced ✓';return;}if(btn.textContent.includes('Add to program')){const ex=(window.RAF&&RAF.RAF_EXERCISES||[]).find(x=>x.name===name);if(ex){ev.preventDefault();put(ex,false);btn.textContent='Added ✓';btn.disabled=true;}}},true);
+  new MutationObserver(clean).observe(document.body,{childList:true,subtree:true});clean();
 })();

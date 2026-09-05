@@ -7,8 +7,14 @@
     list=list.map((c,i)=>{if(c&&c.id)return c;changed=true;return {...c,id:`${slug(c?.name)}-${i+1}`}});
     if(changed)write('rafClients',list);
     let p=read('rafProfile',null);
-    if(p){let match=list.find(c=>c.id===p.id)||(list.find(c=>c.name===p.name));if(match){p={...match,...p,id:match.id};write('rafProfile',p)}}
+    if(p){const match=list.find(c=>c.id===p.id)||list.find(c=>c.name===p.name);if(match){p={...match,...p,id:match.id};write('rafProfile',p)}}
+    migratePrograms(list);
     return {list,profile:p};
+  }
+  function migratePrograms(list){
+    const all=read('rafPrograms',{});let changed=false;
+    list.forEach(c=>{if(c?.name&&all[c.name]&&!all[c.id]){all[c.id]=all[c.name];changed=true}});
+    if(changed)write('rafPrograms',all);
   }
   function setActive(c){if(!c)return;write('rafProfile',c);write('rafActiveClientId',c.id);window.RAF_ACTIVE_CLIENT=c;}
   function active(){const x=ensure(),id=localStorage.getItem('rafActiveClientId');const c=x.list.find(v=>v.id===id)||x.profile||x.list[0]||null;if(c)setActive(c);return c}

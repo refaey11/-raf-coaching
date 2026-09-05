@@ -34,7 +34,7 @@
   function homeButton(){
     const top=document.querySelector('.topbar');
     if(!top||top.querySelector('[data-raf-home]'))return;
-    const b=document.createElement('button');b.type='button';b.dataset.rafHome='1';b.className='secondary';b.textContent='⌂ New client';b.style.cssText='margin-left:12px;white-space:nowrap;';top.appendChild(b);
+    const b=document.createElement('button');b.type='button';b.dataset.rafHome='1';b.className='secondary';b.textContent='⌂ الصفحة الرئيسية';b.style.cssText='margin-left:12px;white-space:nowrap;';top.appendChild(b);
   }
   new MutationObserver(homeButton).observe(document.body,{childList:true,subtree:true});homeButton();
 })();

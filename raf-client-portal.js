@@ -3,6 +3,7 @@
   const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
   const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
   const esc=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));
+  function isClient(){return read('rafSession',null)?.role==='client'}
   function clients(){return read('rafClients',[])}
   function active(){const cs=clients(), id=read('rafActiveClientId',null), p=read('rafProfile',null);return cs.find(c=>c.id===id||c.clientId===id)||p||cs[0]||null}
   function renderPortal(){
@@ -18,6 +19,7 @@
     root.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>window.render?.(b.dataset.view)));
     root.querySelector('#client-checkin-form')?.addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget,d=Object.fromEntries(new FormData(f));const out={...(read('rafClientCheckins',{})[key]||{}),...d,date:new Date().toISOString()};const all=read('rafClientCheckins',{});all[key]=out;const pAll=read('rafClientPhotos',{});for(const k of ['front','side','back']){const file=f.elements[k]?.files?.[0];if(file)out[k]=await new Promise(r=>{const rd=new FileReader();rd.onload=()=>r(rd.result);rd.readAsDataURL(file)})}pAll[key]={front:out.front||pAll[key]?.front,side:out.side||pAll[key]?.side,back:out.back||pAll[key]?.back};write('rafClientCheckins',all);write('rafClientPhotos',pAll);document.querySelector('#client-checkin-status').textContent='Check-in saved locally ✓';renderPortal()});
   }
-  const old=window.render; window.render=function(name){if(name==='client-portal'){document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));renderPortal();return} old?.(name)};
-  document.addEventListener('DOMContentLoaded',()=>{const nav=document.querySelector('nav');if(nav&&!nav.querySelector('[data-view="client-portal"]')){const b=document.createElement('button');b.className='nav-item';b.dataset.view='client-portal';b.innerHTML='♙ <span>Client Portal</span>';nav.appendChild(b);b.addEventListener('click',()=>window.render('client-portal'))}});
+  const old=window.render; window.render=function(name){if(isClient() && (name==='dashboard'||name==='assessment'||name==='clients')){name='client-portal'}if(name==='client-portal'){document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));renderPortal();return} old?.(name)};
+  function lockClientNav(){if(!isClient())return;document.querySelectorAll('.nav-item').forEach(b=>{const v=b.dataset.view;if(['dashboard','clients','assessment','program','rules'].includes(v)){b.style.display='none'}if(v==='client-portal')b.classList.add('active')});}
+  document.addEventListener('DOMContentLoaded',()=>{const nav=document.querySelector('nav');if(nav&&!nav.querySelector('[data-view="client-portal"]')){const b=document.createElement('button');b.className='nav-item';b.dataset.view='client-portal';b.innerHTML='♙ <span>Client Home</span>';nav.appendChild(b);b.addEventListener('click',()=>window.render('client-portal'))}lockClientNav();if(isClient())window.render('client-portal')});
 })();

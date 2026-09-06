@@ -2,6 +2,7 @@
 (function(){
   const U='https://zkymvovbpfrwjyfwylbq.supabase.co';
   const K='sb_publishable_9SgCU4D-48kgotUdi79gfQ_NaouEXbO';
+  const redirect=()=>window.location.origin+window.location.pathname;
   let c;
   const removeOld=()=>['raf-auth-gate','raf-auth-overlay','raf-supa-auth'].forEach(id=>document.getElementById(id)?.remove());
   const ready=()=>window.dispatchEvent(new CustomEvent('raf-auth-ready'));
@@ -23,13 +24,13 @@
     const m=document.getElementById('raf-auth-msg'),email=document.getElementById('raf-email').value.trim();
     if(!email){m.textContent='اكتب الإيميل الأول ثم اضغط Forgot password.';return}
     m.textContent='جارٍ إرسال رابط استعادة كلمة السر...';
-    const r=await c.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+    const r=await c.auth.resetPasswordForEmail(email,{redirectTo:redirect()});
     m.textContent=r.error?r.error.message:'تم إرسال رابط استعادة كلمة السر إلى إيميلك ✓';
   }
   async function submitAuth(mode){
     const m=document.getElementById('raf-auth-msg'),email=document.getElementById('raf-email').value.trim(),password=document.getElementById('raf-password').value,name=document.getElementById('raf-name').value.trim();
     m.textContent='جارٍ تنفيذ الطلب...';
-    const r=mode==='signup'?await c.auth.signUp({email,password,options:{data:{full_name:name,role:'client'}}}):await c.auth.signInWithPassword({email,password});
+    const r=mode==='signup'?await c.auth.signUp({email,password,options:{data:{full_name:name,role:'client'},emailRedirectTo:redirect()}}):await c.auth.signInWithPassword({email,password});
     if(r.error){m.textContent=r.error.message.includes('Invalid login credentials')?'الإيميل أو كلمة السر غير صحيحين. لو نسيت كلمة السر استخدم Forgot password.':r.error.message;return}
     const u=r.data.user;
     if(!u){m.textContent='تم إنشاء الحساب بنجاح ✓ راجع إيميلك لتأكيد الحساب.';return}

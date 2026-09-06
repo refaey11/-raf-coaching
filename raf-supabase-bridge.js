@@ -4,6 +4,7 @@
   const K='sb_publishable_9SgCU4D-48kgotUdi79gfQ_NaouEXbO';
   let c;
   const removeOld=()=>['raf-auth-gate','raf-auth-overlay','raf-supa-auth'].forEach(id=>document.getElementById(id)?.remove());
+  const ready=()=>window.dispatchEvent(new CustomEvent('raf-auth-ready'));
   const saveSession=async(u,fallbackName='')=>{
     const name=fallbackName||u.user_metadata?.full_name||u.email||'Client';
     const q=await c.from('profiles').select('full_name,role').eq('id',u.id).maybeSingle();
@@ -29,6 +30,6 @@
     if(r.error){m.textContent=r.error.message;return}const u=r.data.user;if(!u){m.textContent='Check your email to confirm the account.';return}
     try{await saveSession(u,name);location.reload()}catch(err){console.error(err);m.textContent=err.message||'Could not load your account.';}
   }
-  async function boot(){if(!window.supabase)return;c=window.supabase.createClient(U,K);window.rafSupabase=c;const r=await c.auth.getSession();if(r.data.session){try{await saveSession(r.data.session.user);removeOld()}catch(err){console.error(err);await c.auth.signOut();show()}}else show()}
+  async function boot(){if(!window.supabase)return;c=window.supabase.createClient(U,K);window.rafSupabase=c;const r=await c.auth.getSession();if(r.data.session){try{await saveSession(r.data.session.user);removeOld();ready()}catch(err){console.error(err);await c.auth.signOut();show()}}else show()}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

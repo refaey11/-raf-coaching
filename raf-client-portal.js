@@ -1,25 +1,37 @@
 /* RAF Coaching — client-facing portal */
 (function(){
-  const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
-  const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-  const esc=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));
-  const db=()=>window.rafSupabase;
-  function session(){return read('rafSession',null)||{}}
-  function isClient(){return String(session().role||'').toLowerCase()==='client'}
-  function clients(){return read('rafClients',[])}
-  function active(){const cs=clients(), id=read('rafActiveClientId',null), p=read('rafProfile',null);return cs.find(c=>c.id===id||c.clientId===id)||p||cs[0]||null}
-  function onboarding(){return read('rafClientOnboarding',null)}
-  function renderPortal(){
-    const root=document.querySelector('#app-content'); if(!root)return;
-    const c=active(), o=onboarding(), approved=o?.status==='approved', photos=read('rafClientPhotos',{}), key=c?.id||c?.clientId||session().id||session().userId||c?.name||'guest', ph=photos[key]||{};
-    const planCard=approved
-      ? `<article class="card"><h2>Today’s plan</h2><p class="muted">View your assigned workout and nutrition plan.</p><div class="portal-actions"><button class="primary" data-view="workout">Open workout</button><button class="secondary" data-view="nutrition">Open nutrition</button></div></article>`
-      : `<article class="card"><h2>Plan pending coach approval</h2><p class="muted">Your information was submitted successfully. Your workout and nutrition plan will appear here after your coach reviews and approves your profile.</p><span class="status-pill">${o?.status==='needs-reassessment'?'Reassessment requested':'Waiting for review'}</span></article>`;
-    root.innerHTML=`<section class="hero client-portal-hero"><p class="eyebrow">CLIENT PORTAL</p><h2>Welcome${c?.name?', '+esc(c.name):''}</h2><p class="muted">Your private coaching space for workouts, nutrition, progress and check-ins.</p></section><div class="client-portal-grid">${planCard}<article class="card"><h2>Check-in</h2><p class="muted">Upload your latest body measurements and progress photos for your coach.</p><form id="client-checkin-form" class="form-grid"><label>Body weight (kg)<input name="weight" type="number" step="0.1" value="${esc(c?.weight||'')}"></label><label>Waist (cm)<input name="waist" type="number" step="0.1"></label><label>Front photo<input name="front" type="file" accept="image/*"></label><label>Side photo<input name="side" type="file" accept="image/*"></label><label>Back photo<input name="back" type="file" accept="image/*"></label><label>Notes<textarea name="notes" rows="3" placeholder="How are you feeling this week?"></textarea></label><button class="primary" type="submit">Save check-in</button></form><p id="client-checkin-status" class="muted"></p></article><article class="card"><h2>Progress photos</h2><p class="muted">Only your photos are shown here.</p><div class="photo-preview-grid">${['front','side','back'].map(k=>ph[k]?`<figure><img src="${ph[k]}" alt="${k} progress photo"><figcaption>${k}</figcaption></figure>`:`<div class="photo-empty">No ${k} photo yet</div>`).join('')}</div></article><article class="card"><h2>Coach communication</h2><p class="muted">Your coach can review your check-in, update your plan and request a reassessment.</p>${approved?'<button class="secondary" data-view="progress">View progress</button>':'<p class="muted">Progress tracking will unlock after approval.</p>'}</article></div>`;
-    root.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>window.render?.(b.dataset.view)));
-    root.querySelector('#client-checkin-form')?.addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget,st=root.querySelector('#client-checkin-status'),btn=f.querySelector('button[type=submit]');btn.disabled=true;st.textContent='Saving...';try{const out={weight:f.elements.weight.value?Number(f.elements.weight.value):null,waist:f.elements.waist.value?Number(f.elements.waist.value):null,notes:f.elements.notes.value||'',date:new Date().toISOString()};const pAll=read('rafClientPhotos',{});for(const k of ['front','side','back']){const file=f.elements[k]?.files?.[0];if(file)out[k]=await new Promise((resolve,reject)=>{const rd=new FileReader();rd.onload=()=>resolve(rd.result);rd.onerror=reject;rd.readAsDataURL(file)});if(out[k])pAll[key]={...(pAll[key]||{}),[k]:out[k]}}if(db()&&session().id){const r=await db().from('client_checkins').insert({client_id:session().id,weight:out.weight,waist:out.waist,front_photo:out.front||null,side_photo:out.side||null,back_photo:out.back||null,notes:out.notes});if(r.error)throw r.error}const all=read('rafClientCheckins',{});all[key]=out;write('rafClientCheckins',all);write('rafClientPhotos',pAll);st.textContent='Check-in saved ✓';setTimeout(renderPortal,500)}catch(err){console.error(err);st.textContent='Could not save: '+(err.message||'please try again')}finally{btn.disabled=false}});
-  }
-  const old=window.render; window.render=function(name){if(isClient() && (name==='dashboard'||name==='assessment'||name==='clients'||name==='program'||name==='rules'))name='client-portal';if(name==='client-portal'){document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));renderPortal();return}old?.(name)};
-  function lockClientNav(){if(!isClient())return;document.querySelectorAll('.nav-item').forEach(b=>{const v=b.dataset.view;if(['dashboard','clients','assessment','program','rules'].includes(v))b.style.display='none';if(v==='client-portal')b.classList.add('active')})}
-  document.addEventListener('DOMContentLoaded',()=>{const nav=document.querySelector('nav');if(nav&&!nav.querySelector('[data-view="client-portal"]')){const b=document.createElement('button');b.className='nav-item';b.dataset.view='client-portal';b.innerHTML='♙ <span>Client Home</span>';nav.appendChild(b);b.addEventListener('click',()=>window.render('client-portal'))}lockClientNav();if(isClient())window.render('client-portal')});
+ const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
+ const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+ const esc=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));
+ const db=()=>window.rafSupabase;
+ const session=()=>read('rafSession',{});
+ const isClient=()=>String(session().role||'').toLowerCase()==='client';
+ const active=()=>read('rafProfile',null)||read('rafClients',[])[0]||null;
+ const onboarding=()=>read('rafClientOnboarding',null);
+ function go(view){
+  if(typeof window.render==='function') window.render(view);
+  else {location.hash=view;window.dispatchEvent(new Event('hashchange'));}
+ }
+ function renderPortal(){
+  const root=document.querySelector('#app-content');if(!root)return;
+  const c=active(),o=onboarding(),approved=o?.status==='approved';
+  const key=session().id||session().userId||c?.id||'guest',photos=read('rafClientPhotos',{}),ph=photos[key]||{};
+  const plan=approved?`<article class="card"><h2>Today’s plan</h2><p class="muted">View your assigned workout and nutrition plan.</p><div class="portal-actions"><button class="primary" data-view="workout">Open workout</button><button class="secondary" data-view="nutrition">Open nutrition</button></div></article>`:`<article class="card"><h2>Plan pending coach approval</h2><p class="muted">Your information was submitted successfully. Your coach must review and approve it before your real plan appears.</p><span class="status-pill">${o?.status==='needs-reassessment'?'Reassessment requested':'Waiting for review'}</span></article>`;
+  root.innerHTML=`<section class="hero client-portal-hero"><p class="eyebrow">CLIENT PORTAL</p><h2>Welcome${c?.name?', '+esc(c.name):''}</h2><p class="muted">Your private coaching space for workouts, nutrition, progress and check-ins.</p></section><div class="client-portal-grid">${plan}<article class="card"><h2>Check-in</h2><p class="muted">Upload your latest body measurements and progress photos for your coach.</p><form id="client-checkin-form" class="form-grid"><label>Body weight (kg)<input name="weight" type="number" step="0.1" required></label><label>Waist (cm)<input name="waist" type="number" step="0.1" required></label><label>Front photo<input name="front" type="file" accept="image/*"></label><label>Side photo<input name="side" type="file" accept="image/*"></label><label>Back photo<input name="back" type="file" accept="image/*"></label><label>Notes<textarea name="notes" rows="3" placeholder="How are you feeling this week?"></textarea></label><button class="primary" type="submit">Save check-in</button></form><p id="client-checkin-status" class="muted"></p></article><article class="card"><h2>Progress photos</h2><p class="muted">Only your photos are shown here.</p><div class="photo-preview-grid">${['front','side','back'].map(k=>ph[k]?`<figure><img src="${ph[k]}" alt="${k} progress photo"><figcaption>${k}</figcaption></figure>`:`<div class="photo-empty">No ${k} photo yet</div>`).join('')}</div></article><article class="card"><h2>Coach communication</h2><p class="muted">Your coach can review your check-in and update your plan.</p></article></div>`;
+  root.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.view)));
+  root.querySelector('#client-checkin-form')?.addEventListener('submit',async e=>{
+   e.preventDefault();const f=e.currentTarget,st=root.querySelector('#client-checkin-status'),btn=f.querySelector('button[type=submit]');btn.disabled=true;st.textContent='Saving...';
+   try{
+    if(!db())throw new Error('Connection is not ready. Refresh and try again.');
+    const ur=await db().auth.getUser();const uid=ur.data?.user?.id;if(ur.error||!uid)throw new Error('Your login session expired. Sign in again.');
+    const out={weight:Number(f.elements.weight.value),waist:Number(f.elements.waist.value),notes:f.elements.notes.value||'',date:new Date().toISOString()};
+    const pAll=read('rafClientPhotos',{});
+    for(const k of ['front','side','back']){const file=f.elements[k]?.files?.[0];if(file)out[k]=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});if(out[k])pAll[uid]={...(pAll[uid]||{}),[k]:out[k]};}
+    const r=await db().from('client_checkins').insert({client_id:uid,weight:out.weight,waist:out.waist,front_photo:out.front||null,side_photo:out.side||null,back_photo:out.back||null,notes:out.notes});
+    if(r.error)throw r.error;write('rafClientCheckins',{...read('rafClientCheckins',{}),[uid]:out});write('rafClientPhotos',pAll);st.textContent='Check-in saved ✓';setTimeout(renderPortal,500);
+   }catch(err){console.error(err);st.textContent='Could not save: '+(err.message||'please try again');}finally{btn.disabled=false;}
+  });
+ }
+ const old=window.render;window.render=function(name){if(isClient()&&['dashboard','assessment','clients','program','rules'].includes(name))name='client-portal';if(name==='client-portal'){document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));renderPortal();return}old?.(name)};
+ document.addEventListener('DOMContentLoaded',()=>{const nav=document.querySelector('nav');if(nav&&!nav.querySelector('[data-view="client-portal"]')){const b=document.createElement('button');b.className='nav-item';b.dataset.view='client-portal';b.innerHTML='♙ <span>Client Home</span>';nav.appendChild(b);b.addEventListener('click',()=>go('client-portal'));}if(isClient())go('client-portal');});
 })();

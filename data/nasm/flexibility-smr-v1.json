@@ -1,0 +1,55 @@
+{
+  "source": {
+    "book": "NASM Essentials of Personal Fitness Training",
+    "edition": "Sixth Edition",
+    "chapter": 7,
+    "pages": [176, 177],
+    "verification": "Transcribed only from the uploaded source excerpts; no image/video references added."
+  },
+  "exercises": [
+    {
+      "id": "smr-gastrocnemius-soleus",
+      "name_en": "Gastrocnemius/Soleus Foam Roll",
+      "name_ar": "تحرير ذاتي للعضلة التوأمية والنعلية بالرول",
+      "category": "flexibility",
+      "method": "self-myofascial release",
+      "opt_level": "stabilization",
+      "opt_phases": [1],
+      "equipment": ["foam roll"],
+      "preparation": [
+        "Place foam roll under mid-calf.",
+        "Cross the left leg over the right leg to increase pressure (optional)."
+      ],
+      "movement": [
+        "Slowly roll the calf area to find the most tender spot.",
+        "Once identified, hold the tender spot until discomfort is reduced; minimum 30 seconds."
+      ],
+      "dose": {"hold_seconds_min": 30},
+      "coaching_cues": ["Use gentle pressure.", "Relax consciously while holding the tender spot."],
+      "safety_notes": ["Stop or modify if the client cannot tolerate the pressure."],
+      "source_page": 177
+    },
+    {
+      "id": "smr-tfl-it-band",
+      "name_en": "Tensor Fascia Latae/Iliotibial Band Foam Roll",
+      "name_ar": "تحرير ذاتي للـTFL/الشريط الحرقفي الظنبوبي بالرول",
+      "category": "flexibility",
+      "method": "self-myofascial release",
+      "opt_level": "stabilization",
+      "opt_phases": [1],
+      "equipment": ["foam roll"],
+      "preparation": [
+        "Lie on one side with the foam roll just in front of the hip.",
+        "Cross the top leg over the lower leg, with the foot touching the floor."
+      ],
+      "movement": [
+        "Slowly roll from the hip joint to the lateral knee to find the most tender spot.",
+        "Once identified, hold the tender spot until discomfort is reduced; minimum 30 seconds."
+      ],
+      "dose": {"hold_seconds_min": 30},
+      "coaching_cues": ["Move slowly while locating the tender spot.", "Maintain control of the body position."],
+      "safety_notes": ["Stop or modify if the client cannot tolerate the pressure."],
+      "source_page": 177
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+/* RAF Coaching — stable premium auth screen */
+#raf-supa-auth{position:fixed!important;inset:0!important;z-index:999999!important;display:grid!important;place-items:center!important;padding:24px!important;background:radial-gradient(circle at 85% 10%,#183326 0%,#07100b 42%,#050806 100%)!important;overflow:auto!important}
+#raf-supa-auth>div{position:static!important;width:100%!important;min-height:100%!important;display:grid!important;place-items:center!important;padding:24px!important;background:transparent!important}
+#raf-supa-form{width:min(430px,100%)!important;background:#101a14!important;border:1px solid #2b4737!important;border-radius:28px!important;padding:clamp(26px,6vw,42px)!important;color:#f4f8f3!important;box-shadow:0 24px 80px rgba(0,0,0,.35)!important}
+#raf-supa-form h2{margin:0 0 12px!important;font-size:clamp(30px,8vw,44px)!important;letter-spacing:-1.5px!important;color:#f4f8f3!important}
+#raf-supa-form p{margin:0 0 28px!important;color:#9eb2a4!important;font-size:16px!important;line-height:1.6!important}
+#raf-supa-form input{display:block!important;width:100%!important;height:52px!important;margin:0 0 12px!important;padding:0 16px!important;border:1px solid #385242!important;border-radius:12px!important;background:#0a110d!important;color:#f4f8f3!important;font-size:16px!important;outline:none!important}
+#raf-supa-form input:focus{border-color:#b4f45e!important;box-shadow:0 0 0 3px rgba(180,244,94,.14)!important}
+#raf-supa-form button{display:block!important;width:100%!important;min-height:50px!important;margin:10px 0 0!important;padding:12px 16px!important;border-radius:12px!important;border:1px solid #385242!important;background:transparent!important;color:#e8f2e7!important;font-size:15px!important;font-weight:750!important;cursor:pointer!important}
+#raf-supa-form button[data-mode="signin"]{background:#b4f45e!important;border-color:#b4f45e!important;color:#132016!important}
+#raf-supa-form button[data-mode="signup"]{margin-top:14px!important}
+#raf-supa-form button#raf-forgot{border:0!important;color:#a8e95b!important;font-weight:600!important;min-height:40px!important}
+#raf-auth-msg{min-height:24px!important;margin-top:14px!important;color:#ffb6a8!important;font-size:13px!important;line-height:1.5!important}
+@media(max-width:520px){#raf-supa-auth{padding:12px!important}#raf-supa-auth>div{padding:12px!important}#raf-supa-form{border-radius:22px!important;padding:24px 20px!important}#raf-supa-form h2{font-size:32px!important}}

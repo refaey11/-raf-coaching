@@ -1,0 +1,48 @@
+{
+  "source": {
+    "book": "NASM Essentials of Personal Fitness Training",
+    "edition": "Sixth Edition",
+    "chapter": 7,
+    "pages": [179],
+    "verification": "Exercise names and dosage transcribed from the uploaded source excerpt; detailed execution is not added where the excerpt does not provide it."
+  },
+  "method": "static stretching",
+  "definition": "Passively take a muscle to the point of tension and hold the stretch for a minimum of 30 seconds.",
+  "dose": {
+    "sets": "1–3",
+    "hold_seconds": 30
+  },
+  "opt_level": "stabilization",
+  "opt_phases": [1],
+  "exercises": [
+    {
+      "id": "static-gastrocnemius-stretch",
+      "name_en": "Gastrocnemius Stretch",
+      "name_ar": "إطالة العضلة التوأمية",
+      "source_page": 179
+    },
+    {
+      "id": "static-kneeling-hip-flexor-stretch",
+      "name_en": "Kneeling Hip Flexor Stretch",
+      "name_ar": "إطالة مثنيات الفخذ من وضع الركوع",
+      "source_page": 179
+    },
+    {
+      "id": "static-standing-adductor-stretch",
+      "name_en": "Standing Adductor Stretch",
+      "name_ar": "إطالة العضلات المقربة من الوقوف",
+      "source_page": 179
+    },
+    {
+      "id": "static-pectoral-wall-stretch",
+      "name_en": "Pectoral Wall Stretch",
+      "name_ar": "إطالة عضلات الصدر على الحائط",
+      "source_page": 179
+    }
+  ],
+  "coaching_notes": [
+    "Static stretching is used to decrease muscle spindle activity of a tight muscle before and after activity.",
+    "The source notes that contracting the antagonist can enhance relaxation through reciprocal inhibition.",
+    "The source warns that acute static stretching immediately before exercise may reduce maximal strength and power temporarily."
+  ]
+}

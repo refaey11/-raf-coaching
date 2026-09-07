@@ -25,14 +25,26 @@
     b.id='raf-logout-btn';
     b.type='button';
     b.textContent='تسجيل الخروج';
-    b.style.cssText='position:fixed;top:18px;right:18px;z-index:99998;background:#c1ff63;color:#081008;border:0;border-radius:999px;padding:11px 16px;font-weight:700;font-size:14px;box-shadow:0 4px 18px #0006;cursor:pointer';
+    b.className='nav-item raf-logout-button';
+    b.style.cssText='display:block;width:100%;margin-top:10px;background:transparent;color:inherit;border:1px solid currentColor;border-radius:14px;padding:11px 16px;font-weight:700;font-size:14px;cursor:pointer;text-align:center';
     b.onclick=async()=>{
       b.disabled=true; b.textContent='جارٍ تسجيل الخروج...';
       await c.auth.signOut();
       clearLocal();
       location.reload();
     };
-    document.body.appendChild(b);
+    const home=[...document.querySelectorAll('button,a')].find(x=>/home/i.test(x.textContent||''));
+    if(home?.parentElement){
+      const wrap=document.createElement('div');
+      wrap.className='raf-home-actions';
+      wrap.style.cssText='display:flex;flex-direction:column;align-items:stretch;gap:10px';
+      home.parentElement.insertBefore(wrap,home);
+      wrap.appendChild(home);
+      wrap.appendChild(b);
+    }else{
+      const nav=document.querySelector('nav')||document.querySelector('.topbar');
+      (nav||document.body).appendChild(b);
+    }
   }
 
   function show(){

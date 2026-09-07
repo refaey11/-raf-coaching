@@ -1,6 +1,5 @@
 /* RAF Coaching — sync registered Supabase client accounts into coach Clients */
 (function(){
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   async function sync(){
     const session=JSON.parse(localStorage.getItem('rafSession')||'null');
     if(!session||session.role!=='coach'||!window.rafSupabase)return;
@@ -10,8 +9,11 @@
     const local=JSON.parse(localStorage.getItem('rafClients')||'[]');
     const merged=[...remote,...local.filter(c=>!c.id||!remote.some(r=>r.id===c.id))];
     localStorage.setItem('rafClients',JSON.stringify(merged));
-    if(location.hash.slice(1)==='clients'&&typeof window.render==='function')window.render('clients');
+    if(location.hash.slice(1)==='clients'){
+      const nav=document.querySelector('[data-view="clients"]');
+      if(nav)nav.click();
+    }
   }
-  window.addEventListener('raf-auth-ready',()=>setTimeout(sync,100));
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(sync,800));
+  window.addEventListener('raf-auth-ready',()=>setTimeout(sync,150));
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(sync,900));
 })();

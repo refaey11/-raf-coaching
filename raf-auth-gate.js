@@ -1,9 +1,16 @@
-/* RAF Coaching — legacy local auth disabled. Supabase bridge is the only authentication layer. */
+/* RAF Coaching — legacy local auth disabled; remove any stale gate injected by older bundles. */
 (function(){
+  'use strict';
   function removeLegacyGate(){
-    document.getElementById('raf-auth-gate')?.remove();
-    document.getElementById('raf-auth-overlay')?.remove();
+    ['raf-auth-gate','raf-auth-overlay','auth-gate','auth-overlay'].forEach(id=>document.getElementById(id)?.remove());
+    document.querySelectorAll('[data-legacy-auth],[data-auth-gate]').forEach(el=>el.remove());
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',removeLegacyGate);
-  else removeLegacyGate();
+  function start(){
+    removeLegacyGate();
+    const observer=new MutationObserver(removeLegacyGate);
+    observer.observe(document.documentElement,{childList:true,subtree:true});
+    setTimeout(()=>observer.disconnect(),15000);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true});
+  else start();
 })();

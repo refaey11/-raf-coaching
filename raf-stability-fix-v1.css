@@ -1,0 +1,18 @@
+/* RAF stability layer: keep the app calm on iOS rotation and small screens */
+html,body{margin:0;min-height:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;}
+.app-shell{min-height:100dvh;}
+.main{min-width:0;overflow-x:hidden;}
+#app-content{min-width:0;}
+.nav-item{transition:background-color .18s ease,color .18s ease,transform .18s ease!important;}
+.nav-item:active{transform:scale(.98);}
+@media (orientation:landscape) and (max-height:600px){
+  .sidebar{width:220px!important;min-width:220px!important;}
+  .main{padding:24px 28px!important;}
+  .topbar{min-height:58px!important;}
+  .v2-hero{padding:28px!important;}
+}
+@media (max-width:700px){
+  .app-shell{display:flex!important;align-items:stretch;}
+  .sidebar{position:sticky!important;top:0!important;height:100dvh!important;overflow-y:auto!important;}
+  .main{flex:1 1 auto!important;width:auto!important;}
+}

@@ -1,0 +1,18 @@
+/* RAF Coaching — premium workspace v1 */
+:root{--ink:#17231d;--muted:#738178;--line:#dfe8df;--surface:#fff;--soft:#f1f7ec;--accent:#b6f26a;--accent-ink:#17301c}
+body{background:#f7f9f5!important;color:var(--ink)!important}
+.app-shell{background:#f7f9f5!important}
+.sidebar{background:#fff!important;border-right:1px solid var(--line)!important;padding:28px 18px!important}
+.brand{margin-bottom:42px!important}
+.nav-item{border-radius:14px!important;padding:14px 15px!important;color:#78857c!important}
+.nav-item.active{background:#eaf6df!important;color:#315a2c!important}
+.main{padding:34px clamp(18px,4vw,64px)!important}
+.topbar{margin-bottom:28px!important}
+.topbar h1{font-size:42px!important;font-weight:850!important;letter-spacing:-1.8px!important}
+.hero{background:linear-gradient(135deg,#edf8e5 0%,#fff 78%)!important;border:1px solid #dcebd5!important;border-radius:28px!important;padding:38px!important;box-shadow:0 14px 40px rgba(42,75,42,.05)!important}
+.hero h2{font-size:36px!important;font-weight:850!important}
+.card{border-radius:20px!important;border:1px solid var(--line)!important;box-shadow:0 8px 28px rgba(42,75,42,.045)!important;background:#fff!important}
+.primary{background:var(--accent)!important;color:var(--accent-ink)!important;border-radius:13px!important;padding:14px 20px!important}
+.secondary{border-radius:13px!important;background:#fff!important}
+input,select,textarea{font:inherit!important}
+@media(max-width:520px){.main{padding:18px 14px 88px!important}.topbar h1{font-size:30px!important}.hero{padding:24px!important;border-radius:22px!important}.hero h2{font-size:28px!important}.sidebar{height:72px!important}}

@@ -27,7 +27,7 @@
     b.textContent='تسجيل الخروج';
     b.style.cssText='position:fixed;top:18px;right:18px;z-index:99998;background:#c1ff63;color:#081008;border:0;border-radius:999px;padding:11px 16px;font-weight:700;font-size:14px;box-shadow:0 4px 18px #0006;cursor:pointer';
     b.onclick=async()=>{
-      b.disabled=true; b.textContent='جارٍ الخروج...';
+      b.disabled=true; b.textContent='جارٍ تسجيل الخروج...';
       await c.auth.signOut();
       clearLocal();
       location.reload();
@@ -39,7 +39,7 @@
     removeOld();
     document.getElementById('raf-logout-btn')?.remove();
     const o=document.createElement('div'); o.id='raf-supa-auth';
-    o.innerHTML='<div style="position:fixed;inset:0;background:#080c09;z-index:999999;display:grid;place-items:center;padding:22px"><form id="raf-supa-form" style="width:min(460px,100%);background:#101712;border:1px solid #304238;border-radius:28px;padding:30px;color:#f5f7f5"><h2>RAF Coaching</h2><p>سجّل الدخول إلى مساحتك الخاصة.</p><input id="raf-email" type="email" required placeholder="Email"><input id="raf-password" type="password" required minlength="6" placeholder="Password"><input id="raf-name" placeholder="Full name (new client only)"><button type="button" data-mode="signin">تسجيل الدخول</button><button type="button" data-mode="signup">إنشاء حساب عميل</button><button type="button" id="raf-forgot" style="background:none;color:#c1ff63;border:0;text-decoration:underline">نسيت كلمة السر؟</button><div id="raf-auth-msg"></div></form></div>';
+    o.innerHTML='<div style="position:fixed;inset:0;background:#080c09;z-index:999999;display:grid;place-items:center;padding:22px"><form id="raf-supa-form" style="width:min(460px,100%);background:#101712;border:1px solid #304238;border-radius:28px;padding:30px;color:#f5f7f5"><h2>RAF Coaching</h2><p>سجّل الدخول إلى مساحتك الخاصة.</p><input id="raf-email" type="email" required placeholder="البريد الإلكتروني"><input id="raf-password" type="password" required minlength="6" placeholder="كلمة السر"><input id="raf-name" placeholder="الاسم الكامل (للحساب الجديد فقط)"><button type="button" data-mode="signin">تسجيل الدخول</button><button type="button" data-mode="signup">إنشاء حساب عميل</button><button type="button" id="raf-forgot" style="background:none;color:#c1ff63;border:0;text-decoration:underline">نسيت كلمة السر؟</button><div id="raf-auth-msg"></div></form></div>';
     document.body.appendChild(o);
     o.querySelectorAll('button[data-mode]').forEach(b=>b.onclick=e=>{e.preventDefault();submitAuth(b.dataset.mode)});
     o.querySelector('#raf-forgot').onclick=resetPassword;
@@ -47,10 +47,10 @@
 
   async function resetPassword(){
     const m=document.getElementById('raf-auth-msg'),email=document.getElementById('raf-email').value.trim();
-    if(!email){m.textContent='اكتب الإيميل الأول ثم اضغط نسيت كلمة السر.';return}
-    m.textContent='جارٍ إرسال رابط استعادة كلمة السر...';
+    if(!email){m.textContent='اكتب بريدك الإلكتروني أولًا، ثم اضغط «نسيت كلمة السر؟».';return}
+    m.textContent='جارٍ إرسال رسالة استعادة كلمة السر...';
     const r=await c.auth.resetPasswordForEmail(email,{redirectTo:redirect()});
-    m.textContent=r.error?'تعذر إرسال الرسالة. حاول مرة أخرى.':'تم إرسال رابط استعادة كلمة السر إلى إيميلك ✓';
+    m.textContent=r.error?'تعذر إرسال الرسالة. تأكد من البريد وحاول مرة أخرى.':'تم إرسال رسالة استعادة كلمة السر إلى بريدك الإلكتروني ✓';
   }
 
   async function submitAuth(mode){
@@ -63,17 +63,24 @@
     const r=mode==='signup'?await c.auth.signUp({email,password,options:{data:{full_name:name,role:'client'},emailRedirectTo:redirect()}}):await c.auth.signInWithPassword({email,password});
     if(r.error){
       const msg=r.error.message||'';
-      m.textContent=msg.includes('already registered')?'الإيميل ده مستخدم بالفعل. جرّب تسجيل الدخول.':msg.includes('Invalid login credentials')?'الإيميل أو كلمة السر غير صحيحين.':'حصل خطأ. حاول مرة أخرى.';
+      m.textContent=msg.includes('already registered')?'البريد الإلكتروني ده مستخدم بالفعل. جرّب تسجيل الدخول.':msg.includes('Invalid login credentials')?'البريد الإلكتروني أو كلمة السر غير صحيحين.':'حصل خطأ أثناء العملية. حاول مرة أخرى.';
       return;
     }
     const u=r.data.user;
-    if(!u){m.textContent='تم إنشاء الحساب ✓ افتح إيميلك واضغط رابط التأكيد.';return;}
+    if(!u){
+      m.textContent='تم إنشاء الحساب، وتم إرسال رسالة تأكيد إلى بريدك الإلكتروني. افتح الرسالة واضغط رابط التأكيد، ثم ارجع للموقع وسجّل الدخول.';
+      m.style.color='#c1ff63';
+      return;
+    }
     try{
       await saveSession(u,name);
-      m.textContent=mode==='signup'?'تم إنشاء الحساب بنجاح ✓':'تم تسجيل الدخول بنجاح ✓';
+      m.textContent=mode==='signup'?'تم إنشاء الحساب وتسجيل الدخول بنجاح ✓':'تم تسجيل الدخول بنجاح ✓';
       m.style.color='#c1ff63';
       setTimeout(()=>location.reload(),700);
-    }catch(err){console.error(err);m.textContent='تم تسجيل الدخول، لكن تعذر تحميل بيانات الحساب. حدّث الصفحة.';}
+    }catch(err){
+      console.error(err);
+      m.textContent='تم تسجيل الدخول، لكن تعذر تحميل بيانات الحساب. جرّب تحديث الصفحة، ولو استمرت المشكلة تواصل مع المدرب.';
+    }
   }
 
   async function boot(){

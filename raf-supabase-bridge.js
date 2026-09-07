@@ -1,4 +1,4 @@
-/* RAF Coaching — Supabase authentication bridge */
+/* RAF Coaching — Supabase authentication bridge v3 */
 (function(){
   const U='https://zkymvovbpfrwjyfwylbq.supabase.co';
   const K='sb_publishable_9SgCU4D-48kgotUdi79gfQ_NaouEXbO';
@@ -12,17 +12,18 @@
     const q=await c.from('profiles').select('full_name,role').eq('id',u.id).maybeSingle();
     const profile=q.error?null:q.data;
     const role=profile?.role||u.user_metadata?.role||'client';
-    if(!['client','coach'].includes(role))throw new Error('الحساب غير مصرح له بالدخول.');
+    if(!['client','coach'].includes(role))throw new Error('Unauthorized account.');
     localStorage.setItem('rafSession',JSON.stringify({id:u.id,userId:u.id,name:profile?.full_name||name,role,supabase:true}));
   };
   function addLogoutButton(){
-    if(document.getElementById('raf-logout-btn'))return;
-    const b=document.createElement('button');b.id='raf-logout-btn';b.type='button';b.textContent='تسجيل الخروج';b.className='nav-item raf-logout-button';
+    if(!c||!document.getElementById('app-content'))return;
+    const existing=document.getElementById('raf-logout-btn'); if(existing)return;
+    const b=document.createElement('button'); b.id='raf-logout-btn'; b.type='button'; b.textContent=localStorage.getItem('rafLanguage')==='ar'?'تسجيل الخروج':'Log out'; b.className='nav-item raf-logout-button';
     b.style.cssText='display:block;width:100%;margin-top:10px;background:transparent;color:inherit;border:1px solid currentColor;border-radius:14px;padding:11px 16px;font-weight:700;font-size:14px;cursor:pointer;text-align:center';
-    b.onclick=async()=>{b.disabled=true;b.textContent='جارٍ تسجيل الخروج...';await c.auth.signOut();clearLocal();location.reload()};
-    const home=[...document.querySelectorAll('button,a')].find(x=>/home|الرئيسية/i.test(x.textContent||''));
-    if(home?.parentElement&&!home.parentElement.querySelector('.raf-home-actions')){const w=document.createElement('div');w.className='raf-home-actions';w.style.cssText='display:flex;flex-direction:column;align-items:stretch;gap:10px';home.parentElement.insertBefore(w,home);w.appendChild(home);w.appendChild(b)}
-    else if(!home)(document.querySelector('nav')||document.querySelector('.topbar')||document.body).appendChild(b);
+    b.onclick=async()=>{b.disabled=true;b.textContent=localStorage.getItem('rafLanguage')==='ar'?'جارٍ تسجيل الخروج...':'Signing out...';await c.auth.signOut();clearLocal();location.reload()};
+    const home=[...document.querySelectorAll('button,a')].find(x=>/^(home|الرئيسية)\s*[⌂⌂⌂]?$/i.test((x.textContent||'').trim())||/\bhome\b|الرئيسية/i.test(x.textContent||''));
+    if(home?.parentElement){const w=document.createElement('div');w.className='raf-home-actions';w.style.cssText='display:flex;flex-direction:column;align-items:stretch;gap:10px';home.parentElement.insertBefore(w,home);w.appendChild(home);w.appendChild(b)}
+    else {const target=document.querySelector('.topbar')||document.querySelector('.main')||document.body;target.appendChild(b)}
   }
   function show(){
     removeOld();document.getElementById('raf-logout-btn')?.remove();const o=document.createElement('div');o.id='raf-supa-auth';
@@ -42,6 +43,6 @@
     }catch(err){console.error('RAF auth error',err);m.textContent='تم التحقق من الحساب، لكن تعذر تحميل البيانات. حدّث الصفحة وحاول تسجيل الدخول مرة أخرى.'}
     finally{buttons.forEach(x=>x.disabled=false)}
   }
-  async function boot(){if(!window.supabase)return;c=window.supabase.createClient(U,K);window.rafSupabase=c;const r=await c.auth.getSession();if(r.data.session){try{await saveSession(r.data.session.user);removeOld();addLogoutButton();ready()}catch(err){console.error(err);await c.auth.signOut();clearLocal();show()}}else{clearLocal();show()}}
+  function boot(){if(!window.supabase)return;c=window.supabase.createClient(U,K);window.rafSupabase=c;const rdy=()=>{addLogoutButton();ready()};const observer=new MutationObserver(()=>{addLogoutButton()});observer.observe(document.body,{childList:true,subtree:true});c.auth.getSession().then(async r=>{if(r.data.session){try{await saveSession(r.data.session.user);removeOld();rdy()}catch(err){console.error(err);await c.auth.signOut();clearLocal();show()}}else{clearLocal();show()}})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

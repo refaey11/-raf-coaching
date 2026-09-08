@@ -1,12 +1,34 @@
-/* RAF Nutrition — food search and NASM guidance additions */
+/* RAF Nutrition — single working food search v2 */
 (function(){'use strict';
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function enhance(){const form=document.querySelector('#meal-builder');if(!form||form.dataset.searchFixed)return;form.dataset.searchFixed='1';
- const box=document.createElement('div');box.className='card';box.style.marginBottom='16px';box.innerHTML='<label><b>Search food / ابحث عن الأكل</b><input id="raf-food-search" type="search" placeholder="Chicken, rice, فول، عيش..." autocomplete="off"></label><p class="muted">اكتب اسم الأكل بالإنجليزي أو العربي، ثم اختار من القوائم.</p>';
- form.parentNode.insertBefore(box,form);
- const search=box.querySelector('input');const selects=[...form.querySelectorAll('select[name^="food_"]')];
- const apply=()=>{const q=search.value.trim().toLowerCase();selects.forEach(sel=>{[...sel.options].forEach((o,i)=>{if(i===0){o.hidden=false;return}o.hidden=!!q&&!o.textContent.toLowerCase().includes(q)});if(sel.selectedOptions[0]?.hidden)sel.value=''})};search.addEventListener('input',apply);
- const note=document.createElement('p');note.className='muted';note.innerHTML='<b>NASM guidance:</b> القيم تقريبية لكل 100 جم، والخطة هنا إرشاد غذائي عام وليست علاجًا غذائيًا لحالة مرضية.';form.parentNode.insertBefore(note,form);
-}
-new MutationObserver(enhance).observe(document.body,{childList:true,subtree:true});enhance();
+  const norm=s=>String(s||'').toLocaleLowerCase('ar').replace(/[إأآا]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').trim();
+  function removeDuplicates(){
+    const boxes=[...document.querySelectorAll('#raf-food-search')];
+    boxes.slice(1).forEach(i=>i.closest('.card')?.remove());
+  }
+  function enhance(){
+    const form=document.querySelector('#meal-builder');
+    if(!form)return;
+    removeDuplicates();
+    let box=document.querySelector('#raf-food-search')?.closest('.card');
+    if(!box){
+      box=document.createElement('div');box.className='card';box.id='raf-single-food-search';box.style.marginBottom='16px';
+      box.innerHTML='<label><b>Search food / ابحث عن الأكل</b><input id="raf-food-search" type="search" placeholder="Chicken, rice, فول، عيش..." autocomplete="off" style="width:100%;margin-top:8px"><p id="raf-food-search-status" class="muted" style="margin:8px 0 0">اكتب اسم الأكل، ثم افتح قائمة الوجبة لاختيار النتيجة.</p></label>';
+      form.parentNode.insertBefore(box,form);
+    }
+    const search=box.querySelector('#raf-food-search');
+    if(search.dataset.bound==='1')return;
+    search.dataset.bound='1';
+    const apply=()=>{
+      const q=norm(search.value);let shown=0;
+      form.querySelectorAll('select[name^="food_"]').forEach(sel=>{
+        [...sel.options].forEach((o,i)=>{const match=!q||i===0||norm(o.textContent).includes(q);o.hidden=!match;o.disabled=!match;if(match&&i>0)shown++});
+        if(sel.value && sel.selectedOptions[0]?.disabled)sel.value='';
+      });
+      const status=box.querySelector('#raf-food-search-status');
+      status.textContent=q?(shown?`تم العثور على ${shown} اختيار مطابق — افتح قائمة الوجبة.`:'لا توجد نتيجة. جرّب اسمًا آخر.'):'اكتب اسم الأكل، ثم افتح قائمة الوجبة لاختيار النتيجة.';
+    };
+    search.addEventListener('input',apply);apply();
+  }
+  new MutationObserver(enhance).observe(document.body,{childList:true,subtree:true});
+  enhance();
 })();

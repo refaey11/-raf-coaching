@@ -1,26 +1,5 @@
-/* RAF Nutrition — unlimited food items per meal */
+/* RAF Nutrition — multiple foods per meal */
 (function(){'use strict';
-const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch(e){return f}},write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-const key=c=>c?.id||c?.email||c?.name||'default';
-function addRows(){
- const form=document.querySelector('#meal-builder'); if(!form||form.dataset.multiFood==='1')return;
- form.dataset.multiFood='1';
- form.querySelectorAll('fieldset.meal-box').forEach((box,m)=>{
-   for(let r=5;r<=8;r++){
-    const row=document.createElement('div');row.className='form-grid meal-row';
-    row.innerHTML=`<select name="food_${m}_${r}"><option value="">Choose another food</option></select><input name="grams_${m}_${r}" type="number" min="0" placeholder="grams">`;
-    const source=box.querySelector('select[name^="food_"]');
-    if(source)row.querySelector('select').innerHTML=source.innerHTML.replace('Choose food','Choose another food');
-    box.appendChild(row);
-   }
-   const hint=document.createElement('p');hint.className='muted';hint.textContent='You can add several protein, carbohydrate, vegetable, fruit and fat foods in the same meal.';box.appendChild(hint);
- });
- form.addEventListener('submit',function(e){
-   e.preventDefault();e.stopImmediatePropagation();
-   const all=read('rafNutritionPlans',{}), c=read('rafActiveClient',null)||read('rafProfile',null)||{name:'Client'}, k=key(c), plan=all[k]||{}, totals=[];
-   form.querySelectorAll('fieldset.meal-box').forEach(box=>{const x={calories:0,protein:0,carbs:0,fat:0,items:[]};box.querySelectorAll('select[name^="food_"]').forEach(sel=>{const grams=+form.querySelector(`[name="grams_${sel.name.slice(5)}"]`)?.value||0;const i=sel.value;if(i!==''&&grams>0&&window.RAF_FOODS?.[+i]){const f=window.RAF_FOODS[+i],q=grams/100;x.calories+=f[2]*q;x.protein+=f[3]*q;x.carbs+=f[4]*q;x.fat+=f[5]*q;x.items.push({name:f[0],grams})}});x.calories=Math.round(x.calories);x.protein=Math.round(x.protein);x.carbs=Math.round(x.carbs);x.fat=Math.round(x.fat);totals.push(x)});
-   plan.mealTotals=totals;all[k]=plan;write('rafNutritionPlans',all);location.hash='nutrition';window.render?.('nutrition');
- },true);
-}
-new MutationObserver(addRows).observe(document.body,{childList:true,subtree:true});addRows();
-})();
+const R=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch(e){return f}},W=(k,v)=>localStorage.setItem(k,JSON.stringify(v)),K=c=>c?.id||c?.email||c?.name||'default';
+const M={'Chicken breast, cooked':[165,31,0,3.6],'Chicken thigh, cooked':[209,26,0,11],'Beef kofta, cooked':[250,20,5,17],'Lean beef, cooked':[217,26,0,12],'Liver, cooked':[175,26,5,5],'Tuna in water':[116,26,0,1],'Sardines':[208,25,0,11],'Egg':[143,13,1.1,9.5],'Egg white':[52,11,.7,.2],'Domty white cheese':[260,14,4,20],'Feta cheese':[264,14,4,21],'Plain milk':[61,3.2,4.8,3.3],'Low-fat milk':[42,3.4,5,1],'Plain yogurt':[61,3.5,4.7,3.3],'Rice, cooked':[130,2.7,28,.3],'Egyptian baladi bread':[250,9,50,1.5],'Whole wheat bread':[247,13,41,4.2],'Pita bread':[275,9,56,1.2],'Oats, dry':[389,17,66,7],'Pasta, cooked':[157,5.8,31,.9],'Bulgur, cooked':[83,3.1,19,.2],'Potato, boiled':[87,1.9,20,.1],'Sweet potato, baked':[90,2,21,.2],'Fava beans, cooked':[110,7.6,20,.4],'Falafel/taameya, fried':[333,13,32,18],'Lentil soup':[65,4,10,1],'Chickpeas, cooked':[164,9,27,2.6],'Molokhia, cooked':[45,4,7,.5],'Okra, cooked':[33,1.9,7,.2],'Green beans, cooked':[35,1.9,7.9,.3],'Mixed vegetables':[35,2,7,.3],'Tomato':[18,.9,3.9,.2],'Cucumber':[15,.7,3.6,.1],'Carrot':[41,.9,10,.2],'Banana':[89,1.1,23,.3],'Apple':[52,.3,14,.2],'Orange':[47,.9,12,.1],'Guava':[68,2.6,14,1],'Mango':[60,.8,15,.4],'Grapes':[69,.7,18,.2],'Watermelon':[30,.6,7.6,.2],'Dates':[282,2.5,75,.4],'Olive oil':[884,0,0,100],'Tahini':[595,17,21,54],'Peanuts':[567,26,16,49],'Almonds':[579,21,22,50],'Walnuts':[654,15,14,65],'Avocado':[160,2,9,15]};
+function go(){const f=document.querySelector('#meal-builder');if(!f||f.dataset.mf)return;f.dataset.mf=1;f.querySelectorAll('fieldset.meal-box').forEach((b,m)=>{for(let r=5;r<=8;r++){let d=document.createElement('div');d.className='form-grid meal-row';d.innerHTML=`<select name="food_${m}_${r}"><option value="">Choose another food</option></select><input name="grams_${m}_${r}" type="number" min="0" placeholder="grams">`;let s=b.querySelector('select');if(s)d.querySelector('select').innerHTML=s.innerHTML.replace('Choose food','Choose another food');b.appendChild(d)}let p=document.createElement('p');p.className='muted';p.textContent='Several foods are allowed in this meal: protein + carbs + vegetables + fruit + fats.';b.appendChild(p)});f.addEventListener('submit',e=>{e.preventDefault();e.stopImmediatePropagation();let c=R('rafActiveClient',null)||R('rafProfile',null)||{name:'Client'},a=R('rafNutritionPlans',{}),k=K(c),p=a[k]||{},t=[];f.querySelectorAll('fieldset.meal-box').forEach(b=>{let x={calories:0,protein:0,carbs:0,fat:0,items:[]};b.querySelectorAll('select[name^="food_"]').forEach(s=>{let g=+f.querySelector(`[name="grams_${s.name.replace('food_','grams_')}"]`)?.value||0,n=s.selectedOptions[0]?.textContent.split(' · ')[0],z=M[n];if(z&&g){let q=g/100;x.calories+=z[0]*q;x.protein+=z[1]*q;x.carbs+=z[2]*q;x.fat+=z[3]*q;x.items.push({name:n,grams:g})}});['calories','protein','carbs','fat'].forEach(q=>x[q]=Math.round(x[q]));t.push(x)});p.mealTotals=t;a[k]=p;W('rafNutritionPlans',a);window.render?.('nutrition')},true)}new MutationObserver(go).observe(document.body,{childList:true,subtree:true});go()})();

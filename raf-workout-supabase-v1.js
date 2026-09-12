@@ -1,0 +1,8 @@
+(()=>{'use strict';
+const URL='https://zkymvovbpfrwjyfwylbq.supabase.co',KEY='sb_publishable_9SgCU4D-48kgotUdi79gfQ_NaouEXbO';
+const role=()=>window.RAF_AUTH_ROLE||{};const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};const selected=()=>read('rafActiveClient',null)||read('rafProfile',null);const sb=()=>window.supabase?.createClient?window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'raf-auth-v3'}}):null;
+const clientId=()=>selected()?.id||selected()?.user_id||null;
+async function load(){const s=sb(),id=clientId();if(!s||!id)return null;const r=await s.from('raf_workout_plans').select('id,plan,active,updated_at').eq('client_id',id).eq('active',true).order('updated_at',{ascending:false}).limit(1).maybeSingle();if(r.error||!r.data)return null;return r.data.plan||[]}
+async function save(plan){const s=sb(),coach=role().userId,id=clientId();if(!s||!coach||!id)return false;const r=await s.from('raf_workout_plans').upsert({client_id:id,coach_id:coach,plan,active:true,updated_at:new Date().toISOString()},{onConflict:'client_id'});return !r.error}
+async function syncClient(){if(role().isCoach)return;const p=await load();if(p){const all=read('rafWorkoutPlans',{}),c=selected(),k=c?.id||c?.email||c?.name||'default';all[k]=p;localStorage.setItem('rafWorkoutPlans',JSON.stringify(all));window.dispatchEvent(new CustomEvent('raf-workout-plan-ready'))}}
+window.RAF_WORKOUT_SUPABASE={load,save,syncClient};document.addEventListener('raf-auth-ready',syncClient);setTimeout(syncClient,1200);})();

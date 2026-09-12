@@ -1,9 +1,9 @@
 (()=>{'use strict';
-const COACH='refaey11@icloud.com';const SUPABASE_URL='https://zkymvovbpfrwjyfwylbq.supabase.co';const SUPABASE_KEY='sb_publishable_9SgCU4D-48kgotUdi79gfQ_NaouEXbO';let client,lastUserId=null;
-const norm=e=>String(e||'').trim().toLowerCase();
-function sb(){if(client)return client;if(window.supabaseClient?.auth)return client=window.supabaseClient;if(window.supabase?.auth)return client=window.supabase;if(window.supabase?.createClient)return client=window.supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});return null}
-function clearLocal(){['rafProfile','rafActiveClient','rafActiveClientId'].forEach(k=>localStorage.removeItem(k));lastUserId=null}
-function applyUser(user){if(!user){clearLocal();document.body.dataset.rafRole='guest';if(location.pathname.endsWith('/index.html')||location.pathname==='/'||location.pathname===''){location.replace('login.html')}return null}if(lastUserId===user.id&&window.RAF_AUTH_ROLE?.authenticated)return window.RAF_AUTH_ROLE;lastUserId=user.id;const email=norm(user.email),role=email===COACH?'coach':'client';window.RAF_AUTH_ROLE={authenticated:true,email,role,isCoach:role==='coach',userId:user.id};document.body.dataset.rafRole=role;document.dispatchEvent(new CustomEvent('raf-auth-ready',{detail:window.RAF_AUTH_ROLE}));return window.RAF_AUTH_ROLE}
-async function boot(){const s=sb();if(!s){if(!location.pathname.endsWith('/login.html'))location.replace('login.html');return}s.auth.onAuthStateChange((_e,session)=>applyUser(session?.user||null));const r=await s.auth.getSession();applyUser(r.data?.session?.user||null)}
-window.RAF_AUTH_V3={boot,refresh:applyUser,logout:async()=>{const s=sb();if(s)await s.auth.signOut();clearLocal();location.replace('login.html')}};boot();
+const COACH='refaey11@icloud.com';const SUPABASE_URL='https://zkymvovbpfrwjyfwylbq.supabase.co';const SUPABASE_KEY='sb_publishable_9SgCU4D-48kgotUdi79gfQ_NaouEXbO';
+let client,booted=false;
+const norm=v=>String(v||'').trim().toLowerCase();
+function sb(){if(client)return client;if(window.supabase?.createClient)client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false});return client}
+function publish(user){if(!user){window.RAF_AUTH_ROLE={authenticated:false,email:'',role:'client',isCoach:false};return}const email=norm(user.email);window.RAF_AUTH_ROLE={authenticated:true,email,role:email===COACH?'coach':'client',isCoach:email===COACH,userId:user.id};document.body.dataset.rafRole=window.RAF_AUTH_ROLE.role;document.dispatchEvent(new CustomEvent('raf-auth-ready',{detail:window.RAF_AUTH_ROLE}))}
+async function boot(){if(booted)return;const s=sb();if(!s)return;booted=true;s.auth.onAuthStateChange((event,session)=>{publish(session?.user||null);if(event==='SIGNED_OUT')location.replace('login.html')});const r=await s.auth.getSession();if(r.error){booted=false;return}if(!r.data?.session?.user){location.replace('login.html');return}publish(r.data.session.user)}
+window.RAF_AUTH_V3={boot,refresh:publish,logout:async()=>{const s=sb();if(s)await s.auth.signOut();location.replace('login.html')}};boot();
 })();

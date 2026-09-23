@@ -19,7 +19,7 @@ async function repairList(){
  if(!isCoach()||location.hash!=='#clients')return;
  const remote=await remoteClients();
  const local=read('rafClients',[]).filter(c=>c&&c.id&&String(c.role||'').toLowerCase()!=='coach');
- const merged=[...remote,...local.filter(c=>!remote.some(r=>String(r.id)===String(c.id)))];
+ const merged=remote.map(r=>{const cached=local.find(c=>String(c.id)===String(r.id));return cached?{...cached,...r}:r;});
  write('rafClients',merged);
  const root=document.querySelector('#app-content');
  if(!root)return;

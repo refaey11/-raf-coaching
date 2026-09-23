@@ -33,7 +33,7 @@ async function repairList(){
 function bind(){
  document.addEventListener('click',e=>{const b=e.target.closest('[data-cw-client]');if(!b)return;const list=read('rafClients',[]);const c=list[+b.dataset.cwClient];if(c)selectClient(c);},true);
  window.addEventListener('hashchange',()=>setTimeout(repairList,250));
- window.addEventListener('rafAuthRoleReady',()=>setTimeout(repairList,100));
+ window.addEventListener('raf-auth-ready',()=>setTimeout(repairList,100));
  document.addEventListener('DOMContentLoaded',()=>setTimeout(repairList,700));
 }
 bind();
